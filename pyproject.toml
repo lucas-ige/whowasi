@@ -1,0 +1,44 @@
+[project]
+
+name = "whowasi"
+description = "A tool to record source version information into binaries."
+version = "v1.0.dev0"
+
+authors = [{name="Lucas Bastien"}]
+maintainers = [{name="Lucas Bastien"}]
+
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+
+readme = {file="README.md", content-type="text/markdown"}
+
+keywords = ["git", "version control", "reproducibility"]
+
+requires-python = ">=3.9"
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+    "Natural Language :: English",
+]
+
+[project.urls]
+
+Homepage = "https://github.com/lucas-ige/whowasi"
+Issues = "https://github.com/lucas-ige/whowasi/issues"
+
+[build-system]
+
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.ruff]
+
+line-length = 79
