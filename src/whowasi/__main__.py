@@ -7,6 +7,10 @@
 import argparse
 import os
 
+from ._utils import run_stdout
+
+# Command-line arguments
+
 parser = argparse.ArgumentParser(
     prog="whowasi",
     description="Record source version information into binaries.",
@@ -17,13 +21,14 @@ parser = argparse.ArgumentParser(
 parser.add_argument(
     "-r",
     "--repository",
-    help="Path to the repository",
-    default=".",
+    help="Path to the repository (absolute or relative to current directory)",
+    default=os.getcwd(),
 )
 parser.add_argument(
     "-c",
     "--version-control",
     help="Version control system used by the repository.",
+    choices=("git",),
     default="git",
 )
 parser.add_argument(
@@ -37,7 +42,7 @@ parser.add_argument(
     "--output",
     help=("Output file where to write the code. A relative path is "
           "interpreted as relative to the root of given repository, not "
-          "relative to current working directory (default=whowasi.*)."
+          "relative to current directory (default=whowasi.*)."
           ),
     default=None,
 )
@@ -47,12 +52,25 @@ parser.add_argument(
     help="Name of the whowasi function",
     default="whowasi",
 )
-
 args = parser.parse_args()
 
 language = args.language.lower()
+vcs = args.version_control
 output_file = args.output
 if output_file is None:
     extensions = {"c": "c"}
     output_file = f"whowasi.{extensions[language]}"
 routine_name = args.name
+
+# Get revision information
+
+repo = args.repository
+if vcs == "git":
+    cmd = ["git", "--no-pager"]
+    repo = run_stdout(cmd + ["rev-parse", "--show-toplevel", "-C", repo])[0]
+    cmd += ["-C", repo]
+    commit = run_stdout(cmd + ["log", "-n", "1", "--format=%H"])[0]
+    diff = run_stdout(cmd + ["diff", "--color=never"])
+else:
+    msg = f"Version control system: f{vcs}"
+    raise NotImplementedError(msg)
