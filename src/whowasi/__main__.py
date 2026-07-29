@@ -40,10 +40,11 @@ parser.add_argument(
 parser.add_argument(
     "-o",
     "--output",
-    help=("Output file where to write the code. A relative path is "
-          "interpreted as relative to the root of given repository, not "
-          "relative to current directory (default=whowasi.*)."
-          ),
+    help=(
+        "Output file where to write the code. A relative path is interpreted "
+        "as relative to the root of given repository, not relative to current "
+        "directory (default=whowasi.*)."
+    ),
     default=None,
 )
 parser.add_argument(
