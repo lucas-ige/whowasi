@@ -84,6 +84,8 @@ After building and running this example program, standard output will look somet
 Hello world!
 ```
 
+The `whowasi` function printed information about the commit that was checked out when `myprogram` was compiled.
+
 Now let use translate the program into French:
 
 ```C
@@ -140,3 +142,7 @@ It is now hard-coded into the executable that the corresponding source file had 
 
 > [!CAUTION]
 > Make sure to delete `whowasi` temporary files at compile time to avoid spurious exponential `diff`s (use an appropriate rule in the makefile, as in the example above).
+
+# More information
+
+Use `python -m whowasi --help` for documentation about all available options.
