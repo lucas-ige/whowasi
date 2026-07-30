@@ -4,6 +4,7 @@
 #
 # License: BSD 3-clause "new" or "revised" license (BSD-3-Clause).
 
+import os
 import subprocess
 
 
@@ -65,6 +66,7 @@ def run_stdout(args, **kwargs):
     out = run(args, capture_output=True, text=True, **kwargs)
     return out.stdout[:-1].split("\n")
 
+
 def detailed_git_status(repo):
     """Build a detailed report on the status of given git repository.
 
@@ -76,12 +78,38 @@ def detailed_git_status(repo):
     Returns
     -------
     [str]
-        A detailed report on the status of given repository (array of lines).
+        The report on the status of given repository (array of lines of text).
 
     """
-    cmd = ["git", "--no-pager"]
-    repo = run_stdout(cmd + ["rev-parse", "--show-toplevel", "-C", repo])[0]
-    cmd += ["-C", repo]
-    commit = run_stdout(cmd + ["log", "-n", "1", "--format=%H"])[0]
-    diff = run_stdout(cmd + ["diff", "--color=never"])
-    return [f"Commit = {commit}", ""] + diff
+    # Prepare git command and get path to root of repository
+    git = ["git", "--no-pager"]
+    repo = run_stdout(git + ["rev-parse", "--show-toplevel", "-C", repo])[0]
+    git += ["-C", repo]
+
+    # Add information about current commit
+    commit = run_stdout(git + ["log", "-n", "1", "--color=never"])
+    status = ["Commit", "------", ""] + commit
+
+    # Get lists of new, modified, and deleted files
+    files = {"new": [], "mod": [], "del": []}
+    mapping = {"?? ": "new", " M ": "mod", " D ": "del"}
+    for f in run_stdout(git + ["status", "--porcelain=v1"]):
+        files[mapping[f[:3]]].append(f[3:])
+
+    # Add list and content of new files
+    for f in files["new"]:
+        status += ["", f"New file: {f}", "-" * (10 + len(f)), ""]
+        with open(os.path.join(repo, f)) as opened:
+            status += opened.read().split("\n")
+
+    # Add list of modified files and their diff
+    for f in files["mod"]:
+        status += ["", f"Modified file: {f}", "-" * (15 + len(f)), ""]
+        status += run_stdout(git + ["diff", "--color=never", f])
+
+    # Add list of deleted files
+    if files["del"]:
+        status += ["", "List of deleted files", "-" * 21, ""]
+        status += [f" - {f}" for f in files["del"]]
+
+    return status
