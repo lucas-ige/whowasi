@@ -108,6 +108,5 @@ if language == "c":
         f.write("#include <stdio.h>\n\n")
         f.write(f"void {args.name}(FILE *stream)")
         f.write(" {\n")
-        for line in lines:
-            f.write(f'    fprintf(stream, "{line}\\n");\n')
+        f.writelines(f'    fprintf(stream, "{line}\\n");\n' for line in lines)
         f.write("}\n")
