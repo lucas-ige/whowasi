@@ -7,7 +7,7 @@
 import argparse
 import os
 
-from ._utils import run_stdout
+from ._utils import detailed_git_status
 
 # Command-line arguments
 
@@ -65,20 +65,15 @@ routine_name = args.name
 
 # Get revision information
 
-repo = args.repository
 if vcs == "git":
-    cmd = ["git", "--no-pager"]
-    repo = run_stdout(cmd + ["rev-parse", "--show-toplevel", "-C", repo])[0]
-    cmd += ["-C", repo]
-    commit = run_stdout(cmd + ["log", "-n", "1", "--format=%H"])[0]
-    diff = run_stdout(cmd + ["diff", "--color=never"])
+    status = detailed_git_status(args.repository)
 else:
     msg = f"Version control system: f{vcs}"
     raise NotImplementedError(msg)
 
 # Format revision information
 
-lines = ["", "?? whowasi ??", "", f"Commit: {commit}", ""] + diff + [""]
+lines = ["", "?? whowasi ??", ""] + status + [""]
 nmax = max(len(line) for line in lines)
 full_line = "#" * (nmax + 4)
 lines = (
@@ -108,5 +103,5 @@ if language == "c":
         f.write("#include <stdio.h>\n\n")
         f.write(f"void {args.name}(FILE *stream)")
         f.write(" {\n")
-        f.writelines(f'    fprintf(stream, "{line}\\n");\n' for line in lines)
+        f.writelines(f'    fputs("{line}\\n", stream);\n' for line in lines)
         f.write("}\n")

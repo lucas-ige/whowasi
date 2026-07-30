@@ -64,3 +64,24 @@ def run_stdout(args, **kwargs):
         raise ValueError(msg)
     out = run(args, capture_output=True, text=True, **kwargs)
     return out.stdout[:-1].split("\n")
+
+def detailed_git_status(repo):
+    """Build a detailed report on the status of given git repository.
+
+    Parameters
+    ----------
+    repo: str
+        Path to git repository (not necessarily the root of the repository).
+
+    Returns
+    -------
+    [str]
+        A detailed report on the status of given repository (array of lines).
+
+    """
+    cmd = ["git", "--no-pager"]
+    repo = run_stdout(cmd + ["rev-parse", "--show-toplevel", "-C", repo])[0]
+    cmd += ["-C", repo]
+    commit = run_stdout(cmd + ["log", "-n", "1", "--format=%H"])[0]
+    diff = run_stdout(cmd + ["diff", "--color=never"])
+    return [f"Commit = {commit}", ""] + diff
