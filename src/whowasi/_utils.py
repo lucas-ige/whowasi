@@ -94,7 +94,8 @@ def detailed_git_status(repo):
     files = {"new": [], "mod": [], "del": []}
     mapping = {"?? ": "new", " M ": "mod", " D ": "del"}
     for f in run_stdout(git + ["status", "--porcelain=v1"]):
-        files[mapping[f[:3]]].append(f[3:])
+        if f != "":
+            files[mapping[f[:3]]].append(f[3:])
 
     # Add list and content of new files
     for f in files["new"]:
