@@ -4,7 +4,13 @@
 #
 # License: BSD 3-clause "new" or "revised" license (BSD-3-Clause).
 #
-# This is the main .gitignore file.
+# This makefile builds example programmes that use whowasi.
 
-__pycache__
-examples/example
+CC=gcc
+
+C: c
+
+c: example.c
+	python -m whowasi --language c
+	$(CC) -o example whowasi.c example.c
+	rm whowasi.c whowasi.h
