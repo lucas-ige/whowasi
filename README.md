@@ -135,8 +135,8 @@ Bonjour tout le monde!
 
 It is now hard-coded into the executable that the corresponding source file had been modified but not commited when the program was compiled. We can also note that `whowasi` detected the presence of a binary file called `mypogram`. This corresponds to the executable created during the first step of this example.
 
-> ![IMPORTANT]
+> [!IMPORTANT]
 > `whowasi` currently ignores files and directories listed in `.gitignore` files. Besides, it does not yet work if there are files in the staging area.
 
-> ![CAUTION]
+> [!CAUTION]
 > Make sure to delete `whowasi` temporary files at compile time to avoid spurious exponential `diff`s (use an appropriate rule in the makefile, as in the example above).
