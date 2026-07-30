@@ -6,11 +6,15 @@
 #
 # This makefile builds example programmes that use whowasi.
 
-CC=gcc
-
 C: c
-
 c: example.c
 	python -m whowasi --language c
-	$(CC) -o example whowasi.c example.c
+	gcc -o example_c whowasi.c example.c
 	rm whowasi.c whowasi.h
+
+
+F90: f90
+f90: example.f90
+	python -m whowasi --language f90
+	gfortran -ffree-line-length-none -o example_f90 whowasi.f90 $^
+	rm whowasi.f90 module_whowasi.mod
