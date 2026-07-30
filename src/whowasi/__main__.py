@@ -7,7 +7,7 @@
 import argparse
 import os
 
-from ._utils import detailed_git_status
+from ._utils import detailed_git_status, write_line_c, write_line_f90
 
 # Command-line arguments
 
@@ -35,6 +35,7 @@ parser.add_argument(
     "-l",
     "--language",
     help="Programming language to use (case-insensitive).",
+    choices=("C", "c", "F90", "f90"),
     required=True,
 )
 parser.add_argument(
@@ -59,7 +60,7 @@ language = args.language.lower()
 vcs = args.version_control
 output_file = args.output
 if output_file is None:
-    extensions = {"c": "c"}
+    extensions = {"c": "c", "f90": "f90"}
     output_file = f"whowasi.{extensions[language]}"
 routine_name = args.name
 
@@ -81,7 +82,6 @@ lines = (
     + [f"# {line}" + " " * (nmax - len(line)) + " #" for line in lines]
     + [full_line]
 )
-lines = [line.replace("\\", "\\\\").replace('"', '\\"') for line in lines]
 
 # Hard-coded values
 
@@ -103,5 +103,22 @@ if language == "c":
         f.write("#include <stdio.h>\n\n")
         f.write(f"void {args.name}(FILE *stream)")
         f.write(" {\n")
-        f.writelines(f'    fputs("{line}\\n", stream);\n' for line in lines)
+        f.writelines(f"    {write_line_c(line)};\n" for line in lines)
         f.write("}\n")
+
+elif language == "f90":
+    with open(output_file, mode="w") as f:
+        f.write(f"! {header} \n\n")
+        f.write(f"module module_{args.name}\n\n")
+        f.write("  implicit none\n\n")
+        f.write("contains\n\n")
+        f.write(f"  subroutine {args.name}(unit)\n")
+        f.write("    integer, intent(in) :: unit\n")
+        f.writelines(f"    {write_line_f90(line)}\n" for line in lines)
+        f.write(f"  end subroutine {args.name}\n\n")
+        f.write(f"end module module_{args.name}\n")
+
+
+else:
+    msg = "f{language} language."
+    raise NotImplementedError(msg)

@@ -98,9 +98,23 @@ def detailed_git_status(repo):
 
     # Add list and content of new files
     for f in files["new"]:
-        status += ["", f"New file: {f}", "-" * (10 + len(f)), ""]
-        with open(os.path.join(repo, f)) as opened:
-            status += opened.read().split("\n")
+        filepath = os.path.join(repo, f)
+        # A file can be a sim link, a binary, or a text file
+        try:
+            target = os.readlink(filepath)
+        except OSError:
+            try:
+                with open(filepath) as opened:
+                    lines = opened.read().split("\n")
+            except UnicodeDecodeError:
+                text = f"New file: {f}, which seems to be binary"
+                status += ["", text, "-" * len(text)]
+            else:
+                status += ["", f"New file: {f}", "-" * (10 + len(f)), ""]
+                status += lines
+        else:
+            text = f"New symbolic link: {f} -> {target}"
+            status += ["", text, "-" * len(text)]
 
     # Add list of modified files and their diff
     for f in files["mod"]:
@@ -113,3 +127,55 @@ def detailed_git_status(repo):
         status += [f" - {f}" for f in files["del"]]
 
     return status
+
+
+def write_line_c(line, stream="stream"):
+    """Prepare the C instruction to write given line.
+
+    Parameters
+    ----------
+    line: str
+        The line to write.
+    stream: str
+        The name of the C variable that represents the stream where to write.
+
+    Returns
+    -------
+    str
+        The C instruction to write the line.
+
+    """
+    line = line.replace("\\", "\\\\").replace('"', '\\"')
+    return f'fputs("{line}\\n", stream)'
+
+
+def write_line_f90(line, unit="unit"):
+    """Prepare the FORTRAN 90+ instruction to write given line.
+
+    Parameters
+    ----------
+    line: str
+        The line to write.
+    unit: str
+        The name of the FORTRAN variable that represents the file unit where
+        to write.
+
+    Returns
+    -------
+    str
+        The FORTRAN 90+ instruction to write the line.
+
+    """
+    substrs = []
+    i, n = 0, len(line)
+    while i < n:
+        if line[i] == '"':
+            substrs.append("'" + '"' + "'")
+            i += 1
+        else:
+            j = i
+            while j < n and line[j] != '"':
+                j += 1
+            substrs.append(f'"{line[i:j]}"')
+            i = j
+    return f"write({unit}, '({len(substrs)}A)') " + ", ".join(substrs)
