@@ -92,7 +92,13 @@ def detailed_git_status(repo):
 
     # Get lists of new, modified, and deleted files
     files = {"new": [], "mod": [], "del": []}
-    mapping = {"?? ": "new", " M ": "mod", " D ": "del"}
+    mapping = {
+        "?? ": "new",
+        " M ": "mod",
+        "M  ": "mod",
+        "MM ": "mod",
+        " D ": "del"
+    }
     for f in run_stdout(git + ["status", "--porcelain=v1"]):
         if f != "":
             files[mapping[f[:3]]].append(f[3:])
@@ -120,7 +126,7 @@ def detailed_git_status(repo):
     # Add list of modified files and their diff
     for f in files["mod"]:
         status += ["", f"Modified file: {f}", "-" * (15 + len(f)), ""]
-        status += run_stdout(git + ["diff", "--color=never", f])
+        status += run_stdout(git + ["diff", "HEAD", "--color=never", f])
 
     # Add list of deleted files
     if files["del"]:
