@@ -97,7 +97,7 @@ def detailed_git_status(repo):
         " M ": "mod",
         "M  ": "mod",
         "MM ": "mod",
-        " D ": "del"
+        " D ": "del",
     }
     for f in run_stdout(git + ["status", "--porcelain=v1"]):
         if f != "":
