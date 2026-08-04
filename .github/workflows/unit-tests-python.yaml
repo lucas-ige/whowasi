@@ -6,7 +6,7 @@
 #
 # Workflow to run unit tests on Python code.
 
-name: unit_tests
+name: Unit tests
 on:
   workflow_dispatch:
   push:
