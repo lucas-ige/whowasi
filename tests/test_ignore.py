@@ -9,10 +9,10 @@
 import pytest
 
 from whowasi._ignore import (
+    IgnoreRule,
+    _check_range,
     _indices_of_escaping_characters,
     _remove_non_escaped_trailing_spaces,
-    _check_range,
-    IgnoreRule,
 )
 
 

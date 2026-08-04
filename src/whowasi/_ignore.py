@@ -110,7 +110,7 @@ def _check_range(range_):
             except ValueError:
                 continue
             if i_start >= i_end:
-                msg = f"Range boundaries are out of order."
+                msg = "Range boundaries are out of order."
                 raise ValueError(msg)
             break
         else:
