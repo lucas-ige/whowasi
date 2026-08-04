@@ -145,6 +145,7 @@ class IgnoreRule:
             self._reverse = False
 
         # Create the internal regex representation of the rule
+        self._must_be_dir = False
         self._re = ""
         i, n = 0, len(rule)
         found_double_asterisk = False
@@ -159,6 +160,12 @@ class IgnoreRule:
                     raise ValueError(msg)
                 self._re += re.escape(rule[i + 1])
                 i += 2
+
+            # If the rule ends with a non-escaped slash, only possible matches
+            # are directories
+            elif i == n - 1 and rule[i] == "/":
+                self._must_be_dir = True
+                i += 1
 
             # Deal explicitly with the three possible occurences of **. Only
             # the first instance of ** is treated as such (all other
@@ -204,18 +211,23 @@ class IgnoreRule:
 
         self._re = re.compile(self._re)
 
-    def test_path(self, path):
+    def test_path(self, path, isdir=False):
         """Test if given path matches the rule.
 
         Parameter
         ---------
         path: str
             The path to check.
+        isdir: bool
+            Whether given path represents a directory.
 
         Returns
         -------
             True if given path matches the rule, False otherwise.
 
         """
-        matches = self._re.fullmatch(path) is not None
+        if self._must_be_dir and not isdir:
+            matches = False
+        else:
+            matches = self._re.fullmatch(path) is not None
         return matches if not self._reverse else not matches
