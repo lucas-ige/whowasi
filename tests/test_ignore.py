@@ -6,49 +6,68 @@
 #
 # This file tests whowasi._ignore.
 
-from whowasi._ignore import CharacterRange
+import pytest
+
+from whowasi._ignore import (
+    _indices_of_escaping_characters,
+    _remove_non_escaped_trailing_spaces,
+    _check_range,
+    IgnoreRule,
+)
 
 
-def test_CharacterRange_test_char_single_range():
-    """Test CharacterRange.test_char with a single range."""
-    assert CharacterRange("[A-Z]").test_char("A")
-    assert CharacterRange("[A-Z]").test_char("F")
-    assert CharacterRange("[A-Z]").test_char("Z")
-    assert CharacterRange("[a-z]").test_char("a")
-    assert CharacterRange("[a-z]").test_char("f")
-    assert CharacterRange("[a-z]").test_char("z")
-    assert not CharacterRange("[A-Z]").test_char("a")
-    assert not CharacterRange("[A-Z]").test_char("f")
-    assert not CharacterRange("[A-Z]").test_char("z")
-    assert not CharacterRange("[A-Z]").test_char("4")
-    assert not CharacterRange("[A-Z]").test_char("#")
-    assert not CharacterRange("[a-z]").test_char("A")
-    assert not CharacterRange("[a-z]").test_char("F")
-    assert not CharacterRange("[a-z]").test_char("Z")
-    assert not CharacterRange("[a-z]").test_char("4")
-    assert not CharacterRange("[a-z]").test_char("#")
-    assert CharacterRange("[0-9]").test_char("0")
-    assert CharacterRange("[0-9]").test_char("4")
-    assert CharacterRange("[0-9]").test_char("9")
-    assert not CharacterRange("[0-9]").test_char("a")
-    assert not CharacterRange("[0-9]").test_char("G")
-    assert not CharacterRange("[0-9]").test_char("?")
-    assert CharacterRange("[b-g]").test_char("b")
-    assert CharacterRange("[b-g]").test_char("d")
-    assert CharacterRange("[b-g]").test_char("g")
-    assert not CharacterRange("[b-g]").test_char("a")
-    assert not CharacterRange("[b-g]").test_char("h")
+def test_indices_of_escaping_characters():
+    """Test _indices_of_escaping_characters."""
+    assert _indices_of_escaping_characters("hello") == []
+    assert _indices_of_escaping_characters(r"he\llo") == [2]
+    assert _indices_of_escaping_characters(r"he\llo\ ") == [2, 6]
+    assert _indices_of_escaping_characters(r"he\\\llo\ ") == [2, 4, 8]
+    assert _indices_of_escaping_characters(r"hello\\") == [5]
+    with pytest.raises(ValueError):
+        assert _indices_of_escaping_characters("hello\\")
 
 
-def test_CharacterRange_test_char_multiple_ranges():
-    """Test CharacterRange.test_char with multiple ranges."""
-    assert CharacterRange("[1-6a-g]").test_char("1")
-    assert CharacterRange("[1-6a-g]").test_char("4")
-    assert CharacterRange("[1-6a-g]").test_char("6")
-    assert CharacterRange("[1-6c-g]").test_char("c")
-    assert CharacterRange("[1-6c-g]").test_char("e")
-    assert CharacterRange("[1-6c-g]").test_char("g")
-    assert not CharacterRange("[1-6c-g]").test_char("0")
-    assert not CharacterRange("[1-6c-g]").test_char("7")
-    assert not CharacterRange("[1-6c-g]").test_char("b")
-    assert not CharacterRange("[1-6c-g]").test_char("h")
+def test_remove_non_escaped_trailing_spaces():
+    """Test _remove_non_escaped_trailing_spaces."""
+    fct = _remove_non_escaped_trailing_spaces
+    assert fct("hello") == "hello"
+    assert fct("hello ") == "hello"
+    assert fct("hello \t") == "hello"
+    assert fct("hello\\ \\\t") == "hello\\ \\\t"
+    assert fct("hello\\ \\\t ") == "hello\\ \\\t"
+    assert fct("hello\\ \\\t \t") == "hello\\ \\\t"
+
+
+def test_check_range():
+    """Test _check_range."""
+    for valid in ("[A-Z]", "[b-g]", "[0-4]", "[A-Z0-9]", "[b-mA-V]"):
+        assert _check_range(valid) == valid
+    for invalid in ("[A-]", "b-g", "[0_4]", "[Z-A]"):
+        with pytest.raises(ValueError):
+            assert _check_range(invalid)
+
+
+def test_IgnoreRule_test_path():
+    """Test IgnoreRule.test_path."""
+    assert IgnoreRule("**/*.py").test_path("hello.py")
+    assert IgnoreRule("**/*.py").test_path("foo/hello.py")
+    assert IgnoreRule("**/*.py").test_path("foo/bar/hello.py")
+    assert IgnoreRule("foo/**/*.py").test_path("foo/hello.py")
+    assert IgnoreRule("foo/**/*.py").test_path("foo/bar/hello.py")
+    assert IgnoreRule("foo/**/*.py").test_path("foo/bar/ter/hello.py")
+    assert IgnoreRule("foo/**").test_path("foo/hello.py")
+    assert IgnoreRule("foo/**").test_path("foo/bar/hello.py")
+    assert IgnoreRule("foo/bar/*.py").test_path("foo/bar/hello.py")
+    assert IgnoreRule("foo/bar/*.py").test_path("foo/bar/world.py")
+    assert IgnoreRule("foo/bar/h?llo.py").test_path("foo/bar/hello.py")
+    assert not IgnoreRule("**/*.py").test_path("hello.pyA")
+    assert not IgnoreRule("**/*.py").test_path("foo/hello.pyA")
+    assert not IgnoreRule("**/*.py").test_path("foo/bar/hello.pyA")
+    assert not IgnoreRule("foo/**/*.py").test_path("foo/hello.pyA")
+    assert not IgnoreRule("foo/**/*.py").test_path("foo/bar/hello.pyA")
+    assert not IgnoreRule("foo/**/*.py").test_path("foo/bar/ter/hello.pyA")
+    assert IgnoreRule("foo/**").test_path("foo/hello.pyA")
+    assert IgnoreRule("foo/**").test_path("foo/bar/hello.pyA")
+    assert not IgnoreRule("foo/bar/*.py").test_path("foo/bar/hello.pyA")
+    assert not IgnoreRule("foo/bar/*.py").test_path("foo/bar/world.pyA")
+    assert not IgnoreRule("foo/bar/h?llo.py").test_path("foo/bar/hello.pyA")
