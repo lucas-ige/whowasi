@@ -1,4 +1,4 @@
-[![Ruff](https://github.com/lucas-ige/whowasi/actions/workflows/ruff.yaml/badge.svg)](https://github.com/lucas-ige/whowasi/actions/workflows/ruff.yaml)
+[![Ruff](https://github.com/lucas-ige/whowasi/actions/workflows/ruff.yaml/badge.svg)](https://github.com/lucas-ige/whowasi/actions/workflows/ruff.yaml) [![Unit tests](https://github.com/lucas-ige/whowasi/actions/workflows/unit-tests-python.yaml/badge.svg)](https://github.com/lucas-ige/whowasi/actions/workflows/unit-tests-python.yaml)
 
 # What is whowasi?
 
