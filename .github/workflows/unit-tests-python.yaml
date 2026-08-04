@@ -1,0 +1,38 @@
+# whowasi: a tool to record source version information into binaries.
+#
+# Copyright (c) 2026 Institut des Géosciences de l'Environnement, Grenoble.
+#
+# License: BSD 3-clause "new" or "revised" license (BSD-3-Clause).
+#
+# Workflow to run unit tests on Python code.
+
+name: unit_tests
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '**.py'
+  pull_request:
+    paths:
+      - '**.py'
+jobs:
+  unit_tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - name: Prepare Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          pyton-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install pytest
+      - name: Run the tests
+        run: python -m pytest ./tests
