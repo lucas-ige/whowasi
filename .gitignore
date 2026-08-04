@@ -9,3 +9,4 @@
 __pycache__
 examples/example_c
 examples/example_f90
+tests/whowasi
