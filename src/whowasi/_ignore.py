@@ -6,7 +6,8 @@
 #
 # This file implements tools to apply gitignore-style rules.
 
-class CharacterRange():
+
+class CharacterRange:
     """A character range, eg. "[A-Z]" or "[A-Z0-9]"."""
 
     def __init__(self, range_):
@@ -27,7 +28,7 @@ class CharacterRange():
             msg = "Cannot parse range (bad length)."
             raise ValueError(msg)
         for i in range(len(content) // 3):
-            self._process_single_range(content[3*i:3*(i+1)])
+            self._process_single_range(content[3 * i : 3 * (i + 1)])
 
     def _process_single_range(self, range_):
         """Parse given single range and add it to self.

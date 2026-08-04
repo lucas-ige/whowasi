@@ -8,6 +8,7 @@
 
 from whowasi._ignore import CharacterRange
 
+
 def test_CharacterRange_test_char_single_range():
     """Test CharacterRange.test_char with a single range."""
     assert CharacterRange("[A-Z]").test_char("A")
@@ -37,6 +38,7 @@ def test_CharacterRange_test_char_single_range():
     assert CharacterRange("[b-g]").test_char("g")
     assert not CharacterRange("[b-g]").test_char("a")
     assert not CharacterRange("[b-g]").test_char("h")
+
 
 def test_CharacterRange_test_char_multiple_ranges():
     """Test CharacterRange.test_char with multiple ranges."""
