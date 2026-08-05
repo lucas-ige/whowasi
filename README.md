@@ -165,7 +165,7 @@ Besides, and unlike gitignore rules, a rule that specifies a file name without a
 
 In any case, `whowasi` ignores files and directories listed in `.gitignore` files. That's another method to ignore files.
 
-Note that, by default, `whowasi` automatically ignores the files that it creates and the files that will likely be created by their integration into the compilation process. Use option `--no-auto-ignore` to disable this behavior. The list of automatically ignored files depends on the language. They are given in the table below (the default name "whowasi" can be adjusted with optio `--name`):
+Note that, by default, `whowasi` automatically ignores the files that it creates and the files that will likely be created by their integration into the compilation process. Use option `--no-auto-ignore` to disable this behavior. Which files are automatically ignored depends on the language, as listed in the table below (the default name "whowasi" can be adjusted with option `--name`):
 
 | Language | Automatically ignored files                    |
 | -------- | ---------------------------------------------- |
