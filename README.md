@@ -167,10 +167,10 @@ In any case, `whowasi` ignores files and directories listed in `.gitignore` file
 
 Note that, by default, `whowasi` automatically ignores the files that it creates and the files that will likely be created by their integration into the compilation process. Use option `--no-auto-ignore` to disable this behavior. Which files are automatically ignored depends on the language, as listed in the table below (the default name "whowasi" can be adjusted with option `--name`):
 
-| Language | Automatically ignored files                    |
-| -------- | ---------------------------------------------- |
-| C        | "**/whowasi.c", "**/whowasi.h", "**/whowasi.o" |
-| F90      | "**/whowasi.f90", "**/module_whowasi.mod"      |
+| Language | Automatically ignored files                          |
+| -------- | ---------------------------------------------------- |
+| C        | `"**/whowasi.c"`, `"**/whowasi.h"`, `"**/whowasi.o"` |
+| F90      | `"**/whowasi.f90"`, `"**/module_whowasi.mod"`        |
 
 # More information
 
