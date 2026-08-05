@@ -6,7 +6,6 @@
 #
 # This file implements tools to apply gitignore-style rules.
 
-import os
 import re
 
 
