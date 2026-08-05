@@ -7,6 +7,7 @@
 import argparse
 import os
 
+from ._ignore import IgnoreRuleSet
 from ._utils import detailed_git_status, write_line_c, write_line_f90
 
 # Command-line arguments
@@ -54,6 +55,19 @@ parser.add_argument(
     help="Name of the whowasi function",
     default="whowasi",
 )
+parser.add_argument(
+    "-i",
+    "--ignore",
+    help="Rules to ignore certain files. See documentation for valid syntax.",
+    required=False,
+    nargs="+",
+    default=[],
+)
+parser.add_argument(
+    "--no-auto-ignore",
+    help="Disable default ignore rules.",
+    action="store_true",
+)
 args = parser.parse_args()
 
 language = args.language.lower()
@@ -63,11 +77,20 @@ if output_file is None:
     extensions = {"c": "c", "f90": "f90"}
     output_file = f"whowasi.{extensions[language]}"
 routine_name = args.name
+ignore = [rule for rule in args.ignore]
 
 # Get revision information
 
+if not args.no_auto_ignore:
+    if language == "c":
+        ignore += [f"**/{args.name}.{ext}" for ext in "cho"]
+    elif language == "f90":
+        ignore += [f"**/{args.name}.f90", f"**/module_{args.name}.mod"]
+    else:
+        msg = "f{language} language."
+        raise NotImplementedError(msg)
 if vcs == "git":
-    status = detailed_git_status(args.repository)
+    status = detailed_git_status(args.repository, ignore=IgnoreRuleSet(ignore))
 else:
     msg = f"Version control system: f{vcs}"
     raise NotImplementedError(msg)
@@ -117,7 +140,6 @@ elif language == "f90":
         f.writelines(f"    {write_line_f90(line)}\n" for line in lines)
         f.write(f"  end subroutine {args.name}\n\n")
         f.write(f"end module module_{args.name}\n")
-
 
 else:
     msg = "f{language} language."

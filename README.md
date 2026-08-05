@@ -137,11 +137,40 @@ Bonjour tout le monde!
 
 It is now hard-coded into the executable that the corresponding source file had been modified but not commited when the program was compiled. We can also note that `whowasi` detected the presence of a binary file called `mypogram`. This corresponds to the executable created during the first step of this example.
 
-> [!IMPORTANT]
-> `whowasi` currently ignores files and directories listed in `.gitignore` files.
+# Ignoring files
 
-> [!CAUTION]
-> Make sure to delete `whowasi` temporary files at compile time to avoid spurious exponential `diff`s (use an appropriate rule in the makefile, as in the example above).
+Compiling code can generate intermediate files (eg. object files `*.o`) that you generally do not need to track. In this situation, you can use the option `--ignore` (or `-i` for short) to specify one or more ignore rule(s). For example:
+
+```
+python -m whowasi --language f90 --ignore "**/*.o" "**/*.mod"
+```
+
+The syntax of the rules follows the [gitignore syntax](https://git-scm.com/docs/gitignore). However, only a subset of this syntax is currently implemented into `whowasi`:
+
+ - "**/myscript.py" will ignore any file called `myscript.py` anywhere in the repository.
+ - "**/*.py" will ignore any file with the `.py` extension anywhere in the repository.
+ - "foo/bar/**" will ignore anything in directory `foo/bar`, with infinite depth.
+ - "foo/**/bar/myscript.py" will ignore any file called `myscript.py` in all directories named `bar` that are subdirectories of `foo` at any depth.
+ - a non-escaped "*" means any series of characters except a slash.
+ - a non-escaped "?" means any one character except a slash.
+ - You can escape characters with `\`.
+ - You can use ranges such as "[A-z0-9]" to mean any one character in the given range. Currently supported range boundaries are the (26*2) ASCII letters (lower case and upper case) and the 10 ASCII digits.
+
+Currently **NOT** supported (`whowasi` will not crash but it may not produce the desired result):
+
+ - Any rule that targets a directory and not a file.
+ - The `!` to negate a rule (ie. to force-include files).
+
+Besides, and unlike gitignore rules, a rule that specifies a file name without any context (eg ".DS_Store") will ignore this file only when located at the root of the repository (use "**/.DS_Store" to ignore these pesky files anywhere in the repository).
+
+In any case, `whowasi` ignores files and directories listed in `.gitignore` files. That's another method to ignore files.
+
+Note that, by default, `whowasi` automatically ignores the files that it creates and the files that will likely be created by their integration into the compilation process. Use option `--no-auto-ignore` to disable this behavior. The list of automatically ignored files depends on the language. They are given in the table below (the default name "whowasi" can be adjusted with optio `--name`):
+
+| Language | Automatically ignored files                    |
+| -------- | ---------------------------------------------- |
+| C        | "**/whowasi.c", "**/whowasi.h", "**/whowasi.o" |
+| F90      | "**/whowasi.f90", "**/module_whowasi.mod"      |
 
 # More information
 

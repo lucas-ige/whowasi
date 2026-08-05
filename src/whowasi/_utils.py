@@ -7,6 +7,8 @@
 import os
 import subprocess
 
+from ._ignore import IgnoreRuleSet
+
 
 def run(args, **kwargs):
     """Run given command and arguments as a subprocess.
@@ -67,13 +69,15 @@ def run_stdout(args, **kwargs):
     return out.stdout[:-1].split("\n")
 
 
-def detailed_git_status(repo):
+def detailed_git_status(repo, ignore=IgnoreRuleSet([])):
     """Build a detailed report on the status of given git repository.
 
     Parameters
     ----------
     repo: str
         Path to git repository (not necessarily the root of the repository).
+    ignore: IgnoreRuleSet
+        Rules to ignore certain files.
 
     Returns
     -------
@@ -100,7 +104,7 @@ def detailed_git_status(repo):
         " D ": "del",
     }
     for f in run_stdout(git + ["status", "--porcelain=v1"]):
-        if f != "":
+        if f != "" and not ignore.test_path(f[3:]):
             files[mapping[f[:3]]].append(f[3:])
 
     # Add list and content of new files

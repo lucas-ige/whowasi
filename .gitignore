@@ -7,6 +7,10 @@
 # This is the main .gitignore file.
 
 __pycache__
+examples/whowasi.c
+examples/whowasi.h
 examples/example_c
+examples/whowasi.f90
+examples/module_whowasi.mod
 examples/example_f90
 tests/whowasi

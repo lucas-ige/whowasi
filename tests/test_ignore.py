@@ -10,6 +10,7 @@ import pytest
 
 from whowasi._ignore import (
     IgnoreRule,
+    IgnoreRuleSet,
     _check_range,
     _indices_of_escaping_characters,
     _remove_non_escaped_trailing_spaces,
@@ -75,7 +76,21 @@ def test_IgnoreRule_test_path():
     assert not IgnoreRule("foo/bar/h?llo.py").test_path("foo/bar/hello.py_")
     assert not IgnoreRule("**/.DS_Store").test_path(".DS_Store_")
     assert not IgnoreRule("**/.DS_Store").test_path("foo/bar/.DS_Store_")
-    assert not IgnoreRule("!**/.DS_Store").test_path("foo/bar/.DS_Store")
     assert not IgnoreRule("**/bar/").test_path("foo/bar")
     assert IgnoreRule("**/bar/").test_path("foo/bar", isdir=True)
     assert IgnoreRule("**/bar/").test_path("bar", isdir=True)
+
+
+def test_IgnoreRuleSet_test_path():
+    """Test IgnoreRuleSet.test_path."""
+    assert IgnoreRuleSet(["**/*.py", "**/*.png"]).test_path("hello.py")
+    assert IgnoreRuleSet(["**/*.py", "**/*.png"]).test_path("hello.png")
+    assert IgnoreRuleSet(["**/*.py", "**/*.png"]).test_path("foo/hello.png")
+    assert not IgnoreRuleSet(["**/*.py", "**/*.png"]).test_path("hello.pdf")
+
+
+def test_IgnoreRuleSet_remove_ignored_paths():
+    """Test IgnoreRuleSet.remove_ignored_paths."""
+    ruleset = IgnoreRuleSet(["**/*.py", "**/*.png"])
+    paths = ["hello.py", "hello.pdf", "foo/hello.png"]
+    assert ruleset.remove_ignored_paths(paths) == ["hello.pdf"]

@@ -6,6 +6,7 @@
 #
 # This file implements tools to apply gitignore-style rules.
 
+import os
 import re
 
 
@@ -131,6 +132,8 @@ class IgnoreRule:
             The rule to parse (eg. "**/tests/*.py").
 
         """
+        self._rule = rule
+
         # Preliminary quality checks
         if rule.startswith("/"):
             msg = "Rule may not start with a slash."
@@ -139,10 +142,10 @@ class IgnoreRule:
         # Pre-process the rule
         rule = _remove_non_escaped_trailing_spaces(rule)
         if rule.startswith("!"):
-            self._reverse = True
+            self._force_include = True
             rule = rule[1:]
         else:
-            self._reverse = False
+            self._force_include = False
 
         # Create the internal regex representation of the rule
         self._must_be_dir = False
@@ -211,6 +214,14 @@ class IgnoreRule:
 
         self._re = re.compile(self._re)
 
+    def __str__(self):
+        return self._rule
+
+    @property
+    def force_include(self):
+        """Whether given rule forces to include files instead of excluding."""
+        return self._force_include
+
     def test_path(self, path, isdir=False):
         """Test if given path matches the rule.
 
@@ -230,4 +241,57 @@ class IgnoreRule:
             matches = False
         else:
             matches = self._re.fullmatch(path) is not None
-        return matches if not self._reverse else not matches
+        return matches
+
+
+class IgnoreRuleSet:
+    """Class to handle a set of gitignore-style rules."""
+
+    def __init__(self, rules):
+        """Initialize self with set of rules.
+
+        Parameters
+        ----------
+        rules: [str]
+            A sequence of gitignore-style rules, eg. ["**/*.png", "**/*.pdf"].
+
+        """
+        self._rules = [IgnoreRule(rule) for rule in rules]
+
+    def __str__(self):
+        return "[" + ", ".join(str(rule) for rule in self._rules) + "]"
+
+    def test_path(self, path, isdir=False):
+        """Test if given path matches at least one of the rule.
+
+        Parameter
+        ---------
+        path: str
+            The path to check.
+        isdir: bool
+            Whether given path represents a directory.
+
+        Returns
+        -------
+            True if given path matches at least one rule, False otherwise.
+
+        """
+        for rule in self._rules:
+            if rule.test_path(path, isdir=isdir):
+                return True
+        return False
+
+    def remove_ignored_paths(self, paths):
+        """Return list of paths without ignored paths.
+
+        Parameters
+        ----------
+        paths: [str]
+           Sequence of paths to analyze.
+
+        Warning
+        -------
+        For now, this method treats all given paths as file paths.
+
+        """
+        return [path for path in paths if not self.test_path(path)]
