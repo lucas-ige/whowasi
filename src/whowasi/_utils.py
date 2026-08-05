@@ -103,7 +103,7 @@ def detailed_git_status(repo, ignore=IgnoreRuleSet([])):
         "MM ": "mod",
         " D ": "del",
     }
-    for f in run_stdout(git + ["status", "--porcelain=v1"]):
+    for f in run_stdout(git + ["status", "-uall", "--porcelain=v1"]):
         if f != "" and not ignore.test_path(f[3:]):
             files[mapping[f[:3]]].append(f[3:])
 
