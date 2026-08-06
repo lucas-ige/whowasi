@@ -91,8 +91,16 @@ def detailed_git_status(repo, ignore=IgnoreRuleSet([])):
     git += ["-C", repo]
 
     # Add information about current commit
-    commit = run_stdout(git + ["log", "-n", "1", "--color=never"])
-    status = ["Commit", "------", ""] + commit
+    pretty = "%n".join(
+        [
+            " - Commit:  %H",
+            " - Author:  %an <%aE>",
+            " - Date:    %ad",
+            " - Subject: %s",
+        ]
+    )
+    cmd = git + ["log", "-n", "1", "--color=never", f'--pretty={pretty}']
+    status = ["Commit", "------", ""] + run_stdout(cmd)
 
     # Get lists of new, modified, and deleted files
     files = {"new": [], "mod": [], "del": []}
@@ -189,4 +197,5 @@ def write_line_f90(line, unit="unit"):
                 j += 1
             substrs.append(f'"{line[i:j]}"')
             i = j
-    return f"write({unit}, '({len(substrs)}A)') " + ", ".join(substrs)
+    n = max(len(substrs), 1)
+    return f"write({unit}, '({n}A)') " + ", ".join(substrs)

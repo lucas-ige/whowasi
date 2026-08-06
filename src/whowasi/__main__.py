@@ -68,6 +68,21 @@ parser.add_argument(
     help="Disable default ignore rules.",
     action="store_true",
 )
+parser.add_argument(
+    "--f90-module-name",
+    help=(
+        "Name of the module when generating FORTRAN 90+ code. "
+        "This option has no effect with other languages."
+    ),
+    default=None,
+)
+parser.add_argument(
+    "-f",
+    "--report-format",
+    help="Format of the whowasi report.",
+    choices=("simple", "pretty"),
+    default="simple",
+)
 args = parser.parse_args()
 
 language = args.language.lower()
@@ -78,6 +93,10 @@ if output_file is None:
     output_file = f"whowasi.{extensions[language]}"
 routine_name = args.name
 ignore = [rule for rule in args.ignore]
+if args.f90_module_name is not None:
+    module_name = args.f90_module_name
+else:
+    module_name = f"module_{args.name}"
 
 # Get revision information
 
@@ -97,14 +116,22 @@ else:
 
 # Format revision information
 
-lines = ["", "?? whowasi ??", ""] + status + [""]
-nmax = max(len(line) for line in lines)
-full_line = "#" * (nmax + 4)
-lines = (
-    [full_line]
-    + [f"# {line}" + " " * (nmax - len(line)) + " #" for line in lines]
-    + [full_line]
-)
+if  args.report_format == "simple":
+    lines = ["", ">>> Beginning of whowasi report <<<", ""] \
+        + status \
+        + ["", ">>> End of whowasi report <<<", ""]
+elif args.report_format == "pretty":
+    lines = ["", "?? whowasi ??", ""] + status + [""]
+    nmax = max(len(line) for line in lines)
+    full_line = "#" * (nmax + 4)
+    lines = (
+        [full_line]
+        + [f"# {line}" + " " * (nmax - len(line)) + " #" for line in lines]
+        + [full_line]
+    )
+else:
+    msg = f"Unknown format for whowasi report: {args.report_format}."
+    raise ValueError(msg)
 
 # Hard-coded values
 
@@ -132,14 +159,14 @@ if language == "c":
 elif language == "f90":
     with open(output_file, mode="w") as f:
         f.write(f"! {header} \n\n")
-        f.write(f"module module_{args.name}\n\n")
+        f.write(f"module {module_name}\n\n")
         f.write("  implicit none\n\n")
         f.write("contains\n\n")
         f.write(f"  subroutine {args.name}(unit)\n")
         f.write("    integer, intent(in) :: unit\n")
         f.writelines(f"    {write_line_f90(line)}\n" for line in lines)
         f.write(f"  end subroutine {args.name}\n\n")
-        f.write(f"end module module_{args.name}\n")
+        f.write(f"end module {module_name}\n")
 
 else:
     msg = "f{language} language."
