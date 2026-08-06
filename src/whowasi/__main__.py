@@ -104,7 +104,7 @@ if not args.no_auto_ignore:
     if language == "c":
         ignore += [f"**/{args.name}.{ext}" for ext in "cho"]
     elif language == "f90":
-        ignore += [f"**/{args.name}.f90", f"**/module_{args.name}.mod"]
+        ignore += [f"**/{args.name}.f90", f"**/{module_name}.mod"]
     else:
         msg = "f{language} language."
         raise NotImplementedError(msg)
