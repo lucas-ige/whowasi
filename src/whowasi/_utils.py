@@ -99,7 +99,7 @@ def detailed_git_status(repo, ignore=IgnoreRuleSet([])):
             " - Subject: %s",
         ]
     )
-    cmd = git + ["log", "-n", "1", "--color=never", f'--pretty={pretty}']
+    cmd = git + ["log", "-n", "1", "--color=never", f"--pretty={pretty}"]
     status = ["Commit", "------", ""] + run_stdout(cmd)
 
     # Get lists of new, modified, and deleted files

@@ -116,10 +116,12 @@ else:
 
 # Format revision information
 
-if  args.report_format == "simple":
-    lines = ["", ">>> Beginning of whowasi report <<<", ""] \
-        + status \
+if args.report_format == "simple":
+    lines = (
+        ["", ">>> Beginning of whowasi report <<<", ""]
+        + status
         + ["", ">>> End of whowasi report <<<", ""]
+    )
 elif args.report_format == "pretty":
     lines = ["", "?? whowasi ??", ""] + status + [""]
     nmax = max(len(line) for line in lines)
